@@ -16,11 +16,6 @@ contract MyBank {
         emit UserReceive(msg.sender, msg.value);
     }
 
-    function deposit() external payable{
-        balances[msg.sender] = balances[msg.sender] + msg.value;
-        emit UserReceive(msg.sender, msg.value);
-    }
-
     function Withdraw(uint x) external{
         require(balances[msg.sender] >= x, "user balance not enough");
         balances[msg.sender] = balances[msg.sender] - x;
