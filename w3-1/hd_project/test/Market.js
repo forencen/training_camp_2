@@ -5,12 +5,12 @@ const {expect} = require("chai");
 const hre = require("hardhat");
 const {ethers} = require("hardhat");
 
-let my_token721;
-let my_token20;
-let market;
+
 
 describe("Market", function () {
-
+    let my_token721;
+    let my_token20;
+    let market;
 
     beforeEach(async () => {
         const MyToken20 = await hre.ethers.getContractFactory("MyToken20");
@@ -38,7 +38,7 @@ describe("Market", function () {
         // list nft to market, 设置价格为100000000 token20
         expect(await my_token721.approve(market.address, 0)).not.to.be.reverted;
         await market.connect(owner).list(0, 100000000);
-        let goods_info = await market.showGoods(0)
+        let goods_info = await market.showGoodsn(0)
         expect(goods_info[2] === owner.address);
         expect(goods_info[0] === 0);
     });
@@ -62,6 +62,15 @@ describe("Market", function () {
         expect(await my_token721.ownerOf(0)).to.equal(addr1.address);
         // 检查市场owner的余额
         expect(await market.Bank(owner.address)).to.equal(100000000);
+    });
+
+    it("permit", async function(){
+        const [owner, addr1, addr2] = await ethers.getSigners();
+        await my_token721.mint(addr1.address);
+        my_token721(addr1).safeTransferFrom(addr1.address, market.address, 0, 9999);
+        let goods_info = await market.showGoods(0)
+        expect(goods_info[3], "safeTransferFrom failed");
+
     });
 
 });
