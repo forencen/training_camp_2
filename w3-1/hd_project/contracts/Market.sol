@@ -44,11 +44,7 @@ contract Market is Ownable, IERC721Receiver {
     function list(uint256 _tokenId, uint256 _price) public {
         require(msg.sender == IERC721(token721).ownerOf(_tokenId), "NFT need ownerOf sender");
         IERC721(token721).safeTransferFrom(msg.sender, address(this), _tokenId);
-//        _list(_tokenId, _price, msg.sender);
-    }
-
-    function _list(uint256 _tokenId, uint256 _price, address owner) internal {
-        listMapping[_tokenId] = Goods(_tokenId, _price, owner, true);
+        listMapping[_tokenId] = Goods(_tokenId, _price, msg.sender, true);
         emit GoodsList(_tokenId, msg.sender, _price);
     }
 
@@ -93,8 +89,6 @@ contract Market is Ownable, IERC721Receiver {
         uint256 tokenId,
         bytes calldata data
     ) external returns (bytes4) {
-        (uint256 price) = abi.decode(data, (uint256));
-        _list(tokenId, price, from);
         return this.onERC721Received.selector;
     }
 
