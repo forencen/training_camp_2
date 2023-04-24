@@ -18,5 +18,4 @@ module.exports = {
       goerli: ETHERSCAN_API_KEY
     }
   }
-
 };

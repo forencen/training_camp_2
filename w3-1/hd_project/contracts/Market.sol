@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Market is Ownable {
+contract Market is Ownable, IERC721Receiver {
     using SafeERC20 for IERC20;
 
     address token20;
@@ -50,6 +52,24 @@ contract Market is Ownable {
         Goods memory gItem = listMapping[_tokenId];
         require(gItem.selling, "NFT is not exist");
         require(_price >= gItem.price, "price not enough");
+        IERC20(token20).safeTransferFrom(msg.sender, address(this), _price);
+        delete listMapping[_tokenId];
+        Bank[gItem.owner] += _price;
+        IERC721(token721).safeTransferFrom(address(this), msg.sender, _tokenId);
+        emit GoodeSold(_tokenId, msg.sender, _price);
+    }
+
+    function buyNftWithPermit(
+        uint256 _tokenId,
+        uint256 _price,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s) public {
+        Goods memory gItem = listMapping[_tokenId];
+        require(gItem.selling, "NFT is not exist");
+        require(_price >= gItem.price, "price not enough");
+        IERC20Permit(token20).permit(msg.sender, address(this), _price, deadline, v, r, s);
         IERC20(token20).safeTransferFrom(msg.sender, address(this), _price);
         delete listMapping[_tokenId];
         Bank[gItem.owner] += _price;
